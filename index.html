@@ -525,9 +525,6 @@
       background-color: #f5f5f5;
     }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js"></script>
-
 </head>
 <body>
   <header>
@@ -644,44 +641,20 @@
   </div>
 
   <script>
-  const apiKey = "36f42e37ec955232d149850261c6eca1";
-  const allowedUsers = ["EVVORTEX", "Razgab", "Luca", "Roby56"];
-  const users = {};
-  const userTickets = {
-    EVVORTEX: 278,
-    Razgab: 226,
-    Luca: 255,
-    Roby56: 176
-  };
-  const userBets = {};
-
-  let currentUser = null;
-  let currentSport = "basketball_nba";
-  let currentView = "sport";
-  let currentMatches = [];
-
-  function saveData() {
-    localStorage.setItem("karuta_users", JSON.stringify(users));
-    localStorage.setItem("karuta_userTickets", JSON.stringify(userTickets));
-    localStorage.setItem("karuta_userBets", JSON.stringify(userBets));
-  }
-
-  function loadData() {
-    const storedUsers = JSON.parse(localStorage.getItem("karuta_users"));
-    const storedTickets = JSON.parse(localStorage.getItem("karuta_userTickets"));
-    const storedBets = JSON.parse(localStorage.getItem("karuta_userBets"));
-
-    if (storedUsers) Object.assign(users, storedUsers);
-    if (storedTickets) Object.assign(userTickets, storedTickets);
-    if (storedBets) Object.assign(userBets, storedBets);
-  }
-
-document.addEventListener('DOMContentLoaded', function () {
-  loadData();
-  updateTicketDisplay();
-});
-
-
+    const apiKey = "36f42e37ec955232d149850261c6eca1";
+    const allowedUsers = ["EVVORTEX", "Razgab", "Luca", "Roby56"];
+    const users = {};
+    const userTickets = {
+      EVVORTEX: 278,
+      Razgab: 226,
+      Luca: 255,
+      Roby56: 176
+    };
+    const userBets = {};
+    let currentUser = null;
+    let currentSport = "basketball_nba";
+    let currentView = "sport";
+    let currentMatches = [];
 
 const manualOdds = {
   // ... existente ...
@@ -1592,44 +1565,10 @@ function openBettingModalForSport() {
   modal.style.display = 'block';
 }
 </script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyANxeEV8QlGDWdi4RrVK8qd7VTuM5Un8VI",
-    authDomain: "kcasino-f35a8.firebaseapp.com",
-    databaseURL: "https://kcasino-f35a8-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "kcasino-f35a8",
-    storageBucket: "kcasino-f35a8.firebasestorage.app",
-    messagingSenderId: "215657852255",
-    appId: "1:215657852255:web:a100eb5abe8d9e9f899aea",
-    measurementId: "G-DNKF7D6YLM"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // 🔸 Salvează ticketele în Firebase
-  window.saveTicketsToFirebase = function (username, ticketCount) {
-    set(ref(db, "users/" + username), {
-      tickets: ticketCount
-    }).then(() => {
-      console.log("✅ Ticketele au fost salvate pentru", username);
-    });
-  };
-
-  // 🔸 Încarcă ticketele din Firebase
-  window.loadTicketsFromFirebase = async function (username, callback) {
-    const snapshot = await get(child(ref(db), "users/" + username));
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      callback(data.tickets);
-    } else {
-      callback(0); // sau valoare default
-    }
-  };
 
   <script>
+
+<script>
 </body>
 </html>
