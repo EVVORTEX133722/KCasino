@@ -1100,9 +1100,7 @@ function loadOdds(sport) {
       userBets[currentUser].push(bet);
       
       // Deduct tickets
-      saveTicketsToFirebase(currentUser, userTickets[currentUser]);
-      saveBetToFirebase(currentUser, selectedOdd, betAmount, matchLabel);
-
+      userTickets[currentUser] -= betAmount;
       
       // Update display
       updateTicketDisplay();
@@ -1457,12 +1455,6 @@ async function settleFinishedUFCBets() {
     alert("Access denied.");
     return;
   }
-  container.innerHTML += `
-  <button onclick="showAllBetsFromFirebase()" style="margin-bottom: 15px; padding: 10px 16px; background: #1e1e1e; color: #fff; border: 1px solid #dc2626; border-radius: 8px; cursor: pointer;">
-    🔍 View All Firebase Bets
-  </button>
-`;
-
   const container = document.getElementById("odds-content");
   container.innerHTML = `<h2 style="color: #dc2626; margin-bottom: 20px;">🧠 Admin Panel - Ticket Editor & Betting History</h2>`;
 
@@ -1599,49 +1591,6 @@ function openBettingModalForSport() {
   document.getElementById('place-bet-btn').disabled = true;
   modal.style.display = 'block';
 }
-
-function showAllBetsFromFirebase() {
-  if (currentUser !== "EVVORTEX") return alert("Access denied.");
-
-  const container = document.getElementById("odds-content");
-  container.innerHTML = `<h2 style="color: #dc2626; margin-bottom: 20px;">🗂️ All Firebase Bets (Admin)</h2>`;
-
-  loadAllBetsFromFirebase((allBets) => {
-    let any = false;
-
-    for (const user in allBets) {
-      const bets = allBets[user];
-      if (!bets.length) continue;
-      any = true;
-
-      container.innerHTML += `<h3 style="color: white; margin-top: 20px;">👤 ${user}</h3>`;
-
-      bets.reverse().forEach(bet => {
-        container.innerHTML += `
-          <div class="ticket-item">
-            <div class="ticket-header">
-              <div>
-                <div class="ticket-match">${bet.match}</div>
-                <div class="ticket-details">
-                  Bet on: ${bet.odd} | Cote: ${bet.cote.toFixed(2)}
-                </div>
-              </div>
-              <div class="ticket-amount">
-                <div><b>${bet.amount} 🎟️</b></div>
-                <div style="font-size: 12px; color: #ccc;">${new Date(bet.timestamp).toLocaleString()}</div>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    if (!any) {
-      container.innerHTML += `<div class="empty-state"><h3>No bets placed in Firebase.</h3></div>`;
-    }
-  });
-}
-
 </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
@@ -1680,58 +1629,6 @@ function showAllBetsFromFirebase() {
       callback(0); // sau valoare default
     }
   };
-  window.saveBetToFirebase = function (username, odd, amount, match) {
-  const dbRef = ref(db, "bets/" + username);
-  get(dbRef).then(snapshot => {
-    const existing = snapshot.exists() ? snapshot.val() : [];
-    const updated = [
-      ...existing,
-      {
-        match,
-        odd: odd.name,
-        cote: parseFloat(odd.price),
-        amount,
-        timestamp: Date.now()
-      }
-    ];
-    set(dbRef, updated).then(() => {
-      console.log("✅ Bilet salvat în Firebase");
-    });
-  });
-};
-window.loadBetsFromFirebase = function (username, callback) {
-  get(child(ref(db), "bets/" + username)).then(snapshot => {
-    if (snapshot.exists()) {
-      callback(snapshot.val());
-    } else {
-      callback([]);
-    }
-  });
-};
-function saveBetToFirebase(username, betData) {
-  const dbRef = ref(db, `bets/${username}/${Date.now()}`);
-  set(dbRef, betData).then(() => {
-    console.log("✅ Bet saved for", username);
-  });
-}
-
-window.loadAllBetsFromFirebase = function(callback) {
-  const users = ["EVVORTEX", "Razgab", "Luca", "Roby56"];
-  const dbRef = ref(db);
-  const allBets = {};
-  let remaining = users.length;
-
-  users.forEach(user => {
-    get(child(dbRef, "bets/" + user)).then(snapshot => {
-      allBets[user] = snapshot.exists() ? snapshot.val() : [];
-      remaining--;
-      if (remaining === 0) {
-        callback(allBets);
-      }
-    });
-  });
-};
-
 
   <script>
 </body>
