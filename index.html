@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Karuta's Casino</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1e1e1e;
+      color: white;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+      padding: 10px 30px;
+      border-bottom: 2px solid #ccc;
+      color: #000;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 900;
+      color: #dc2626;
+      transform: rotate(-5deg);
+      font-family: 'Arial Black', sans-serif;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .center-menu {
+      display: flex;
+      gap: 30px;
+      font-size: 16px;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .center-menu  {<a id="admin-()panel-btn" class="hidden" onclick="showAdminPanel()">🧠 Admin Panel</a>
+
+      text-decoration: none;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .center-menu a:hover {
+      color: #dc2626;
+    }
+
+    .ticket-display {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+      color: #dc2626;
+      border: 1px solid #dc2626;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .container {
+      flex: 1;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: #2c2c2c;
+      padding: 20px;
+      border-right: 2px solid #444;
+    }
+
+    .sidebar h3 {
+      font-size: 14px;
+      margin: 15px 0;
+      color: #ccc;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .sidebar button {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px 16px;
+      background: none;
+      border: none;
+      color: white;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+
+    .sidebar button:hover {
+      background-color: #444;
+      transform: translateX(4px);
+    }
+
+    .sidebar button.active {
+      background-color: rgba(220, 38, 38, 0.2);
+      color: #dc2626;
+    }
+
+    main {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .login-section {
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 30px;
+      background: linear-gradient(135deg, #2c2c2c 0%, #242424 100%);
+      border: 1px solid #444;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .login-section h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 24px;
+      color: #dc2626;
+    }
+
+    .login-section p {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #ccc;
+      font-size: 14px;
+    }
+
+    .login-section input {
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      border: 1px solid #444;
+      border-radius: 6px;
+      background-color: #1e1e1e;
+      color: white;
+      font-size: 14px;
+    }
+
+    .login-section input:focus {
+      outline: none;
+      border-color: #dc2626;
+    }
+
+    .login-section .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .login-section button {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .btn-register {
+      background-color: transparent;
+      color: white;
+      border: 1px solid #444;
+    }
+
+    .btn-register:hover {
+      background-color: #444;
+    }
+
+    .btn-login {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: white;
+      box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-login:hover {
+      background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+      box-shadow: 0 4px 8px rgba(220, 38, 38, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .match-container {
+      background: linear-gradient(135deg, #2c2c2c 0%, #242424 100%);
+      border: 1px solid #444;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      transition: all 0.2s ease;
+    }
+
+    .match-container:hover {
+      border-color: #dc2626;
+      box-shadow: 0 4px 16px rgba(220, 38, 38, 0.2);
+    }
+
+    .match-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .match-time {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #ccc;
+      margin-bottom: 10px;
+    }
+
+    .team-name {
+      font-weight: bold;
+      font-size: 18px;
+      color: white;
+    }
+
+    .odds-box {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .odd-item {
+      text-align: center;
+    }
+
+    .odd-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #ccc;
+      margin-bottom: 8px;
+    }
+
+    .odd {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 10px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .bet-button {
+      width: 100%;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+    }
+
+    .bet-button:hover {
+      background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+      box-shadow: 0 4px 8px rgba(220, 38, 38, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #2c2c2c 0%, #242424 100%);
+      margin: 5% auto;
+      padding: 30px;
+      border: 2px solid rgba(220, 38, 38, 0.2);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      color: white;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #dc2626;
+    }
+
+    .selected-bet {
+      background-color: rgba(220, 38, 38, 0.1);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+      margin-bottom: 20px;
+    }
+
+    .bet-input-section {
+      margin: 20px 0;
+    }
+
+    .bet-input-section label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .bet-input-section input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #444;
+      border-radius: 6px;
+      background-color: #1e1e1e;
+      color: white;
+      font-size: 16px;
+    }
+
+    .quick-bet-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .quick-bet-buttons button {
+      padding: 8px 12px;
+      background-color: transparent;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quick-bet-buttons button:hover {
+      background-color: #444;
+    }
+
+    .bet-calculation {
+      background-color: rgba(220, 38, 38, 0.05);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+    }
+
+    .calc-row.highlight {
+      font-weight: bold;
+      color: #4ade80;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cancel {
+      background-color: transparent;
+      color: white;
+      border: 1px solid #444;
+    }
+
+    .btn-cancel:hover {
+      background-color: #444;
+    }
+
+    .btn-place-bet {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: white;
+      box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-place-bet:hover {
+      background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+      box-shadow: 0 4px 8px rgba(220, 38, 38, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-place-bet:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      color: #ef4444;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #ccc;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #ccc;
+    }
+
+    .empty-state h3 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .ticket-item {
+      background: linear-gradient(135deg, #2c2c2c 0%, #242424 100%);
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 15px;
+    }
+
+    .ticket-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .ticket-match {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .ticket-details {
+      color: #ccc;
+      font-size: 14px;
+    }
+
+    .ticket-amount {
+      text-align: right;
+    }
+
+    .ticket-status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-top: 5px;
+    }
+
+    .status-pending {
+      background-color: rgba(234, 179, 8, 0.2);
+      color: #fbbf24;
+    }
+
+    .status-won {
+      background-color: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+    }
+
+    .status-lost {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .logout-btn {
+      background-color: transparent;
+      color: black;
+      border: 1px solid #ccc;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: 15px;
+    }
+
+    .logout-btn:hover {
+      background-color: #f5f5f5;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js"></script>
+
+</head>
+<body>
+  <header>
+    <div class="logo">KARUTA</div>
+    <nav class="center-menu">
+      <a onclick="loadSport()">Sport</a>
+      <a onclick="showMyTickets()">Biletele Mele</a>
+      <a onclick="showHelp()">Ajutor</a>
+    </nav>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span id="ticket-display" class="ticket-display"></span>
+      <button id="admin-panel-btn" class="logout-btn hidden" onclick="showAdminPanel()">🧠 Admin Panel</button>
+      <button id="logout-btn" class="logout-btn hidden" onclick="logout()">Logout</button>
+    </div>
+  </header>
+  <!-- Login Section -->
+  <div class="login-section" id="auth-section">
+    <h1>Welcome to Karuta's Casino</h1>
+    <p>Please login or register to start betting</p>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <div class="button-group">
+      <button class="btn-register" onclick="register()">Register</button>
+      <button class="btn-login" onclick="login()">Login</button>
+    </div>
+    <p style="margin-top: 15px; font-size: 12px; color: #666;">
+      Only authorized users: EVVORTEX, Razgab, Luca, Roby56
+    </p>
+    <div id="auth-message" class="error-message"></div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container hidden" id="main-content">
+    <div class="sidebar">
+      <h3>↓ Sports A-Z</h3>
+      <h3 style="margin-top: 20px;">⚽ Fotbal - Selectează Liga</h3>
+<select onchange="loadOdds(this.value)" style="width: 100%; padding: 10px; border-radius: 8px; background-color: #1e1e1e; color: white; border: 1px solid #444; margin-top: 10px;">
+  <option value="soccer_uefa_champs_league">UEFA Champions League</option>
+  <option value="soccer_epl">Premier League (Anglia)</option>
+  <option value="soccer_spain_la_liga">La Liga (Spania)</option>
+  <option value="soccer_italy_serie_a">Serie A (Italia)</option>
+  <option value="soccer_germany_bundesliga">Bundesliga (Germania)</option>
+  <option value="soccer_france_ligue_one">Ligue 1 (Franța)</option>
+   <option value="soccer_fifa_world_cup">Cupa Mondiala</option>
+</select>
+<
+
+      <button onclick="loadOdds('basketball_nba')" data-sport="basketball_nba" class="active">🏀 NBA</button>
+     <button onclick="loadOdds('mma_mixed_martial_arts')" data-sport="mma_mixed_martial_arts">🥊 UFC</button>
+
+    </div>
+    <main>
+      <div id="content-area">
+        <div id="odds-content">
+          <div class="loading">Loading matches...</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Betting Modal -->
+  <div id="betting-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title">📈 Place Your Bet</span>
+      </div>
+      
+      <div id="selected-bet-display" class="selected-bet">
+        <!-- Dynamic content -->
+      </div>
+
+      <div class="bet-input-section">
+        <label for="bet-amount">🎟️ Bet Amount (Tickets)</label>
+        <input type="number" id="bet-amount" placeholder="Enter amount..." min="1">
+        <div style="font-size: 12px; color: #ccc; margin-top: 5px;">
+          Available: <span id="available-tickets">0</span> tickets
+        </div>
+      </div>
+
+      <div class="quick-bet-buttons">
+        <button onclick="setQuickBet(10)">10</button>
+        <button onclick="setQuickBet(25)">25</button>
+        <button onclick="setQuickBet(50)">50</button>
+        <button onclick="setQuickBet(100)">100</button>
+      </div>
+
+      <div id="bet-calculation" class="bet-calculation hidden">
+        <div style="font-weight: bold; margin-bottom: 10px;">🧮 Bet Calculation</div>
+        <div class="calc-row">
+          <span>Bet Amount:</span>
+          <span id="calc-amount">0 tickets</span>
+        </div>
+        <div class="calc-row">
+          <span>Odds:</span>
+          <span id="calc-odds">0.00</span>
+        </div>
+        <div class="calc-row">
+          <span>Potential Winnings:</span>
+          <span id="calc-winnings" style="color: #4ade80;">0 tickets</span>
+        </div>
+        <div class="calc-row highlight">
+          <span>Potential Profit:</span>
+          <span id="calc-profit">+0 tickets</span>
+        </div>
+      </div>
+
+      <div id="bet-error" class="error-message hidden"></div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeBettingModal()">Cancel</button>
+        <button id="place-bet-btn" class="btn-place-bet" onclick="placeBet()" disabled>Place Bet</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const apiKey = "36f42e37ec955232d149850261c6eca1";
+  const allowedUsers = ["EVVORTEX", "Razgab", "Luca", "Roby56"];
+  const users = {};
+  const userTickets = {
+    EVVORTEX: 278,
+    Razgab: 226,
+    Luca: 255,
+    Roby56: 176
+  };
+  const userBets = {};
+
+  let currentUser = null;
+  let currentSport = "basketball_nba";
+  let currentView = "sport";
+  let currentMatches = [];
+
+  function saveData() {
+    localStorage.setItem("karuta_users", JSON.stringify(users));
+    localStorage.setItem("karuta_userTickets", JSON.stringify(userTickets));
+    localStorage.setItem("karuta_userBets", JSON.stringify(userBets));
+  }
+
+  function loadData() {
+    const storedUsers = JSON.parse(localStorage.getItem("karuta_users"));
+    const storedTickets = JSON.parse(localStorage.getItem("karuta_userTickets"));
+    const storedBets = JSON.parse(localStorage.getItem("karuta_userBets"));
+
+    if (storedUsers) Object.assign(users, storedUsers);
+    if (storedTickets) Object.assign(userTickets, storedTickets);
+    if (storedBets) Object.assign(userBets, storedBets);
+  }
+
+document.addEventListener('DOMContentLoaded', function () {
+  loadData();
+  updateTicketDisplay();
+});
+
+
+
+const manualOdds = {
+  // ... existente ...
+  // Cotă demo pentru meciuri viitoare:
+  20250614: { "Kamaru Usman": 3.00, "Joaquin Buckley": 1.42 },          // UFC on ESPN: Usman vs Buckley
+  317000: { "Ilia Topuria": 1.25, "Charles Oliveira": 3.80 },          // UFC 317: Topuria vs Oliveira
+  318000: { "Max Holloway": 1.90, "Dustin Poirier": 1.85 },            // UFC 318: Holloway vs Poirier 3
+  319000: { "Dricus Du Plessis": 1.53, "Khamzat Chimaev": 2.65 }        // UFC 319: Du Plessis vs Chimaev
+};
+
+
+    let selectedMatch = null;
+    let selectedOdd = null;
+
+    // Initialize app
+    document.addEventListener('DOMContentLoaded', function() {
+      updateTicketDisplay();
+      if (currentUser === "EVVORTEX") {
+  document.getElementById("admin-view-btn").classList.remove("hidden");
+  document.getElementById("admin-edit-btn").classList.remove("hidden");
+}
+
+
+function saveTicketUpdate(username) {
+  const input = document.getElementById(`input-${username}`);
+  const newValue = parseInt(input.value);
+
+  if (isNaN(newValue) || newValue < 0) {
+    alert("⚠️ Invalid number");
+    return;
+  }
+
+  userTickets[username] = newValue;
+  document.getElementById(`tickets-${username}`).textContent = newValue;
+
+  alert(`✅ Updated ${username} to ${newValue} tickets`);
+
+  if (username === currentUser) {
+    updateTicketDisplay(); // dacă admin își editează propriile tickete
+  }
+}
+
+
+      // Add enter key support for login
+      document.getElementById('password').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          login();
+        }
+      });
+
+      // Add bet amount input listener
+      document.getElementById('bet-amount').addEventListener('input', updateBetCalculation);
+    });
+
+    function updateTicketDisplay() {
+      const display = document.getElementById("ticket-display");
+      const logoutBtn = document.getElementById("logout-btn");
+      
+      if (currentUser && userTickets[currentUser] !== undefined) {
+        display.textContent = `${currentUser} | 🎟️ ${userTickets[currentUser]} tickets`;
+        display.classList.remove('hidden');
+        logoutBtn.classList.remove('hidden');
+      } else {
+        display.textContent = "";
+        display.classList.add('hidden');
+        logoutBtn.classList.add('hidden');
+      }
+    }
+
+    function register() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const message = document.getElementById("auth-message");
+
+  message.textContent = "";
+
+    if (currentUser === "EVVORTEX") {
+      document.getElementById("admin-panel-btn").classList.remove("hidden");
+    }
+  message.style.color = "#ef4444";
+
+  if (!username || !password) {
+    message.textContent = "Please enter username and password.";
+    return;
+  }
+
+  if (!allowedUsers.includes(username)) {
+    message.textContent = "Username not allowed.";
+    return;
+  }
+
+  if (users[username]) {
+    message.textContent = "Username already registered.";
+    return;
+  }
+
+  users[username] = password;
+  userBets[username] = [];
+
+  if (userTickets[username] === undefined) {
+    userTickets[username] = 50;
+  }
+
+  // ✅ Salvează automat username și parola
+  localStorage.setItem("karuta_user", username);
+  localStorage.setItem("karuta_pass", password);
+
+  message.textContent = "Registered successfully. Now login.";
+  message.style.color = "#4ade80";
+}
+
+
+    function login() {
+  let username = document.getElementById("username").value.trim();
+  let password = document.getElementById("password").value.trim();
+  const message = document.getElementById("auth-message");
+
+  // ✅ Dacă userul nu a scris manual, încercăm din localStorage
+  if (!username || !password) {
+    username = localStorage.getItem("karuta_user") || "";
+    password = localStorage.getItem("karuta_pass") || "";
+  }
+
+  message.style.color = "#ef4444";
+
+  if (!username || !password) {
+    message.textContent = "Please enter username and password.";
+    return;
+  }
+
+  if (users[username] === password) {
+    currentUser = username;
+    document.getElementById("auth-section").classList.add("hidden");
+    document.getElementById("main-content").classList.remove("hidden");
+    updateTicketDisplay();
+    loadOdds(currentSport);
+    message.textContent = "";
+
+    if (currentUser === "EVVORTEX") {
+      document.getElementById("admin-panel-btn").classList.remove("hidden");
+    }
+  } else {
+    message.textContent = "Invalid credentials.";
+  }
+}
+
+
+    function logout() {
+      currentUser = null;
+      document.getElementById("auth-section").classList.remove("hidden");
+      document.getElementById("main-content").classList.add("hidden");
+      document.getElementById("username").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("auth-message").textContent = "";
+      updateTicketDisplay();
+      closeBettingModal();
+    }
+
+function loadOdds(sport) {
+  if (!currentUser) return;
+
+  currentSport = sport;
+  currentView = "sport";
+
+  const oddsContainer = document.getElementById("odds-content");
+  oddsContainer.innerHTML = '<div class="loading">Loading matches...</div>';
+
+  if (sport === "mma_mixed_martial_arts") {
+      const matches = [
+  {
+    id: 20250614,
+    date: "2025-06-14T19:00:00Z",
+    fighters: [
+      { name: "Kamaru Usman" },
+      { name: "Joaquin Buckley" }
+    ]
+  },
+  {
+    id: 317000,
+    date: "2025-06-28T02:00:00Z",
+    fighters: [
+      { name: "Ilia Topuria" },
+      { name: "Charles Oliveira" }
+    ]
+  },
+  {
+    id: 318000,
+    date: "2025-07-19T00:00:00Z",
+    fighters: [
+      { name: "Max Holloway" },
+      { name: "Dustin Poirier" }
+    ]
+  },
+  {
+    id: 319000,
+    date: "2025-08-16T01:00:00Z",
+    fighters: [
+      { name: "Dricus Du Plessis" },
+      { name: "Khamzat Chimaev" }
+    ]
+  }
+];
+
+
+    currentMatches = matches;
+    let html = "";
+
+    matches.forEach((match, index) => {
+      const fightId = match.id;
+      const fighter1 = match.fighters[0].name;
+      const fighter2 = match.fighters[1].name;
+      const odds = manualOdds[fightId];
+
+      html += `
+        <div class="match-container">
+          <div class="match-header">
+            <div class="match-time">🕒 ${new Date(match.date).toLocaleString()}</div>
+            <div class="team-name">${fighter1} vs ${fighter2}</div>
+          </div>
+          <div class="odds-box">
+            <div class="odd-item">
+              <div class="odd-label">${fighter1}</div>
+              <div class="odd">${odds ? odds[fighter1].toFixed(2) : "Manual"}</div>
+              ${odds ? `<button class="bet-button" onclick="openBettingModal(${index}, 'fighter1', '${fighter1}', ${odds[fighter1]})">🏆 Bet</button>` : ""}
+            </div>
+            <div class="odd-item">
+              <div class="odd-label">${fighter2}</div>
+              <div class="odd">${odds ? odds[fighter2].toFixed(2) : "Manual"}</div>
+              ${odds ? `<button class="bet-button" onclick="openBettingModal(${index}, 'fighter2', '${fighter2}', ${odds[fighter2]})">🏆 Bet</button>` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    oddsContainer.innerHTML = html;
+    return;
+  }
+
+  // ⚽ NBA & Fotbal - OddsAPI
+  fetch(`https://api.the-odds-api.com/v4/sports/${sport}/odds/?regions=eu&markets=h2h&apiKey=36f42e37ec955232d149850261c6eca1`)
+    .then(res => res.json())
+    .then(data => {
+      const matches = data || [];
+      currentMatches = matches.slice(0, 5);
+      displayMatches(currentMatches);
+    })
+    .catch(err => {
+      console.error(err);
+      oddsContainer.innerHTML = '<div class="empty-state"><h3>Error loading matches</h3></div>';
+    });
+}
+
+
+
+
+    function displayMatches(matches) {
+      const container = document.getElementById("odds-content");
+      
+      if (!matches.length) {
+        container.innerHTML = '<div class="empty-state"><h3>🏆 No matches available</h3><p>Check back later for new betting opportunities!</p></div>';
+        return;
+      }
+
+      let html = '';
+      matches.forEach((game, index) => {
+        const bookmaker = game.bookmakers?.[0];
+        const outcomes = bookmaker?.markets?.[0]?.outcomes || [];
+        
+        html += `
+          <div class="match-container">
+            <div class="match-header">
+              <div class="match-time">
+                🕒 ${new Date(game.commence_time).toLocaleString()}
+              </div>
+              <div class="team-name">${game.away_team} vs ${game.home_team}</div>
+            </div>
+            <div class="odds-box">
+        `;
+        
+        outcomes.forEach(outcome => {
+          const outcomeType = outcome.name === game.home_team ? 'home' : 
+                             outcome.name === game.away_team ? 'away' : 'draw';
+          
+          html += `
+            <div class="odd-item">
+              <div class="odd-label">${outcome.name}</div>
+              <div class="odd">${parseFloat(outcome.price).toFixed(2)}</div>
+              <button class="bet-button" onclick="openBettingModal(${index}, '${outcomeType}', '${outcome.name}', ${outcome.price})">
+                🏆 Bet
+              </button>
+            </div>
+          `;
+        });
+        
+        html += `
+            </div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+
+    function openBettingModal(matchIndex, outcome, outcomeName, price) {
+      if (!currentUser) return;
+      
+      selectedMatch = currentMatches[matchIndex];
+      selectedOdd = { outcome, name: outcomeName, price };
+      
+      const modal = document.getElementById('betting-modal');
+      const selectedBetDisplay = document.getElementById('selected-bet-display');
+      const availableTickets = document.getElementById('available-tickets');
+      
+      selectedBetDisplay.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: bold; font-size: 16px;">${outcomeName}</div>
+            <div style="color: #ccc; font-size: 14px;">${selectedMatch.away_team} vs ${selectedMatch.home_team}</div>
+            <div style="color: #ccc; font-size: 12px;">${new Date(selectedMatch.commence_time).toLocaleString()}</div>
+          </div>
+          <div>
+            <div class="odd" style="margin: 0;">${parseFloat(price).toFixed(2)}</div>
+          </div>
+        </div>
+      `;
+      
+      availableTickets.textContent = userTickets[currentUser];
+      
+      // Reset form
+      document.getElementById('bet-amount').value = '';
+      document.getElementById('bet-calculation').classList.add('hidden');
+      document.getElementById('bet-error').classList.add('hidden');
+      document.getElementById('place-bet-btn').disabled = true;
+      
+      modal.style.display = 'block';
+    }
+
+    function closeBettingModal() {
+      document.getElementById('betting-modal').style.display = 'none';
+      selectedMatch = null;
+      selectedOdd = null;
+    }
+
+    function setQuickBet(amount) {
+      if (amount > userTickets[currentUser]) return;
+      document.getElementById('bet-amount').value = amount;
+      updateBetCalculation();
+    }
+
+    function updateBetCalculation() {
+      const betAmount = parseInt(document.getElementById('bet-amount').value) || 0;
+      const calculation = document.getElementById('bet-calculation');
+      const errorDiv = document.getElementById('bet-error');
+      const placeBetBtn = document.getElementById('place-bet-btn');
+      
+      if (betAmount <= 0) {
+        calculation.classList.add('hidden');
+        errorDiv.classList.add('hidden');
+        placeBetBtn.disabled = true;
+        return;
+      }
+      
+      if (betAmount > userTickets[currentUser]) {
+        errorDiv.textContent = `Insufficient tickets. You only have ${userTickets[currentUser]} tickets available.`;
+        errorDiv.classList.remove('hidden');
+        calculation.classList.add('hidden');
+        placeBetBtn.disabled = true;
+        return;
+      }
+      
+      errorDiv.classList.add('hidden');
+      
+      const odds = parseFloat(selectedOdd.price);
+      const potentialWinnings = Math.floor(betAmount * odds);
+      const profit = potentialWinnings - betAmount;
+      
+      document.getElementById('calc-amount').textContent = `${betAmount} tickets`;
+      document.getElementById('calc-odds').textContent = odds.toFixed(2);
+      document.getElementById('calc-winnings').textContent = `${potentialWinnings} tickets`;
+      document.getElementById('calc-profit').textContent = `+${profit} tickets`;
+      
+      calculation.classList.remove('hidden');
+      placeBetBtn.disabled = false;
+    }
+
+    function placeBet() {
+      if (!selectedMatch || !selectedOdd || !currentUser) return;
+      
+      const betAmount = parseInt(document.getElementById('bet-amount').value) || 0;
+      
+      if (betAmount <= 0 || betAmount > userTickets[currentUser]) return;
+      
+      const odds = parseFloat(selectedOdd.price);
+      const potentialWinnings = Math.floor(betAmount * odds);
+      
+      // Create bet record
+      const bet = {
+        id: Date.now(),
+        match: selectedMatch,
+        outcome: selectedOdd.outcome,
+        outcomeName: selectedOdd.name,
+        amount: betAmount,
+        odds: odds,
+        potentialWinnings: potentialWinnings,
+        placedAt: new Date(),
+        status: 'pending'
+      };
+      
+      // Initialize user bets if not exists
+      if (!userBets[currentUser]) {
+        userBets[currentUser] = [];
+      }
+      
+      // Add bet to user's bets
+      userBets[currentUser].push(bet);
+      
+      // Deduct tickets
+      saveTicketsToFirebase(currentUser, userTickets[currentUser]);
+      saveBetToFirebase(currentUser, selectedOdd, betAmount, matchLabel);
+
+      
+      // Update display
+      updateTicketDisplay();
+      
+      // Show success message
+      alert(`Bet placed successfully! You bet ${betAmount} tickets on ${selectedOdd.name}. Potential winnings: ${potentialWinnings} tickets.`);
+      function showAllTickets() {
+  if (currentUser !== "EVVORTEX") return alert("Access denied.");
+
+  const container = document.getElementById("odds-content");
+  container.innerHTML = `<h2 style="color: #dc2626; margin-bottom: 20px;">🎫 All User Tickets</h2>`;
+
+  let foundAny = false;
+
+  for (const user in userBets) {
+    const bets = userBets[user];
+    if (!bets || !bets.length) continue;
+
+    foundAny = true;
+    container.innerHTML += `<h3 style="margin-top: 20px; color: #fff;">👤 ${user}</h3>`;
+
+    bets.slice().reverse().forEach(bet => {
+      container.innerHTML += `
+        <div class="ticket-item">
+          <div class="ticket-header">
+            <div>
+              <div class="ticket-match">${bet.match.away_team} vs ${bet.match.home_team}</div>
+              <div class="ticket-details">
+                Bet on: ${bet.outcomeName} | Placed: ${new Date(bet.placedAt).toLocaleString()}
+              </div>
+            </div>
+            <div class="ticket-amount">
+              <div style="font-weight: bold;">${bet.amount} tickets @ ${bet.odds.toFixed(2)}</div>
+              <div style="color: #4ade80; font-size: 14px;">Potential: ${bet.potentialWinnings} tickets</div>
+              <span class="ticket-status status-${bet.status}">${bet.status}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+function adjustTickets() {
+  if (currentUser !== "EVVORTEX") return alert("Access denied.");
+
+  const username = prompt("Enter username to modify:");
+  if (!allowedUsers.includes(username)) return alert("User not allowed or doesn't exist.");
+
+  const current = userTickets[username] ?? 0;
+  const newAmount = prompt(`Current tickets: ${current}\nEnter new ticket amount:`);
+
+  const parsed = parseInt(newAmount);
+  if (isNaN(parsed) || parsed < 0) return alert("Invalid number.");
+
+  userTickets[username] = parsed;
+  alert(`✅ Updated ${username}'s tickets to ${parsed}.`);
+
+  if (username === currentUser) {
+    updateTicketDisplay(); // dacă își modifică propriile tickete
+  }
+}
+
+  if (!foundAny) {
+    container.innerHTML += `
+      <div class="empty-state"><h3>No bets placed by any users yet.</h3></div>
+    `;
+  }
+}
+
+      closeBettingModal();
+    }
+
+    function loadSport() {
+  currentView = "sport";
+  const container = document.getElementById("odds-content");
+  container.innerHTML = '<div class="loading">Loading matches...</div>';
+
+  // Fetch all three sports in parallel
+  Promise.all([
+    fetch(`https://api.the-odds-api.com/v4/sports/soccer_uefa_champs_league/odds/?regions=eu&markets=h2h&apiKey=36f42e37ec955232d149850261c6eca1`).then(res => res.json()).catch(() => []),
+    fetch(`https://api.the-odds-api.com/v4/sports/basketball_nba/odds/?regions=eu&markets=h2h&apiKey=36f42e37ec955232d149850261c6eca1`).then(res => res.json()).catch(() => []),
+    // UFC is manual
+    Promise.resolve([
+      { id: 20250614, date: "2025-06-14T19:00:00Z", fighters: [{ name: "Kamaru Usman" }, { name: "Joaquin Buckley" }] },
+      { id: 317000, date: "2025-06-28T02:00:00Z", fighters: [{ name: "Ilia Topuria" }, { name: "Charles Oliveira" }] },
+      { id: 318000, date: "2025-07-19T00:00:00Z", fighters: [{ name: "Max Holloway" }, { name: "Dustin Poirier" }] },
+      { id: 319000, date: "2025-08-16T01:00:00Z", fighters: [{ name: "Dricus Du Plessis" }, { name: "Khamzat Chimaev" }] }
+    ])
+  ]).then(([uefa, nba, ufc]) => {
+    let html = '';
+
+    // UEFA
+    html += `<h2 style="color:#dc2626;">⚽ UEFA Champions League</h2>`;
+    if (uefa && uefa.length) {
+      uefa.slice(0, 5).forEach((game, index) => {
+        const bookmaker = game.bookmakers?.[0];
+        const outcomes = bookmaker?.markets?.[0]?.outcomes || [];
+        html += `
+          <div class="match-container">
+            <div class="match-header">
+              <div class="match-time">🕒 ${new Date(game.commence_time).toLocaleString('ro-RO', { timeZone: 'Europe/Bucharest' })}</div>
+              <div class="team-name">${game.away_team} vs ${game.home_team}</div>
+            </div>
+            <div class="odds-box">
+        `;
+        outcomes.forEach(outcome => {
+          const outcomeType = outcome.name === game.home_team ? 'home' : outcome.name === game.away_team ? 'away' : 'draw';
+          html += `
+            <div class="odd-item">
+              <div class="odd-label">${outcome.name}</div>
+              <div class="odd">${parseFloat(outcome.price).toFixed(2)}</div>
+              <button class="bet-button" onclick="openBettingModalFromSport('uefa', ${index}, '${outcomeType}', '${outcome.name}', ${outcome.price})">🏆 Bet</button>
+            </div>
+          `;
+        });
+        html += `</div></div>`;
+      });
+    } else {
+      html += `<div class="empty-state"><h3>No UEFA matches available</h3></div>`;
+    }
+
+    // NBA
+    html += `<h2 style="color:#dc2626;">🏀 NBA</h2>`;
+    if (nba && nba.length) {
+      nba.slice(0, 5).forEach((game, index) => {
+        const bookmaker = game.bookmakers?.[0];
+        const outcomes = bookmaker?.markets?.[0]?.outcomes || [];
+        html += `
+          <div class="match-container">
+            <div class="match-header">
+              <div class="match-time">🕒 ${new Date(game.commence_time).toLocaleString('ro-RO', { timeZone: 'Europe/Bucharest' })}</div>
+              <div class="team-name">${game.away_team} vs ${game.home_team}</div>
+            </div>
+            <div class="odds-box">
+        `;
+        outcomes.forEach(outcome => {
+          const outcomeType = outcome.name === game.home_team ? 'home' : outcome.name === game.away_team ? 'away' : 'draw';
+          html += `
+            <div class="odd-item">
+              <div class="odd-label">${outcome.name}</div>
+              <div class="odd">${parseFloat(outcome.price).toFixed(2)}</div>
+              <button class="bet-button" onclick="openBettingModalFromSport('nba', ${index}, '${outcomeType}', '${outcome.name}', ${outcome.price})">🏆 Bet</button>
+            </div>
+          `;
+        });
+        html += `</div></div>`;
+      });
+    } else {
+      html += `<div class="empty-state"><h3>No NBA matches available</h3></div>`;
+    }
+
+    // UFC
+    html += `<h2 style="color:#dc2626;">🥊 UFC</h2>`;
+    if (ufc && ufc.length) {
+      ufc.forEach((match, index) => {
+        const fightId = match.id;
+        const fighter1 = match.fighters[0].name;
+        const fighter2 = match.fighters[1].name;
+        const odds = manualOdds[fightId];
+        html += `
+          <div class="match-container">
+            <div class="match-header">
+              <div class="match-time">🕒 ${new Date(match.date).toLocaleString('ro-RO', { timeZone: 'Europe/Bucharest' })}</div>
+              <div class="team-name">${fighter1} vs ${fighter2}</div>
+            </div>
+            <div class="odds-box">
+              <div class="odd-item">
+                <div class="odd-label">${fighter1}</div>
+                <div class="odd">${odds ? odds[fighter1].toFixed(2) : "Manual"}</div>
+                ${odds ? `<button class="bet-button" onclick="openBettingModalFromSport('ufc', ${index}, 'fighter1', '${fighter1}', ${odds[fighter1]})">🏆 Bet</button>` : ""}
+              </div>
+              <div class="odd-item">
+                <div class="odd-label">${fighter2}</div>
+                <div class="odd">${odds ? odds[fighter2].toFixed(2) : "Manual"}</div>
+                ${odds ? `<button class="bet-button" onclick="openBettingModalFromSport('ufc', ${index}, 'fighter2', '${fighter2}', ${odds[fighter2]})">🏆 Bet</button>` : ""}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    } else {
+      html += `<div class="empty-state"><h3>No UFC matches available</h3></div>`;
+    }
+
+    container.innerHTML = html;
+
+    // Store matches for betting modal
+    window.sportMatches = { uefa, nba, ufc };
+  });
+}
+
+    function showMyTickets() {
+      if (!currentUser) return;
+      
+      currentView = "tickets";
+      const container = document.getElementById("odds-content");
+      
+      const bets = userBets[currentUser] || [];
+      
+      if (bets.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3>🎟️ No betting tickets</h3>
+            <p>You haven't placed any bets yet.</p>
+            <p style="margin-top: 10px; font-size: 14px;">Go to the Sports section to start betting!</p>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = '<div style="margin-bottom: 20px;"><h2 style="color: #dc2626;">🎟️ My Betting Tickets</h2></div>';
+      
+      bets.reverse().forEach(bet => {
+        html += `
+          <div class="ticket-item">
+            <div class="ticket-header">
+              <div>
+                <div class="ticket-match">${bet.match.away_team} vs ${bet.match.home_team}</div>
+                <div class="ticket-details">
+                  Bet on: ${bet.outcomeName} | Placed: ${new Date(bet.placedAt).toLocaleString()}
+                </div>
+              </div>
+              <div class="ticket-amount">
+                <div style="font-weight: bold;">${bet.amount} tickets @ ${bet.odds.toFixed(2)}</div>
+                <div style="color: #4ade80; font-size: 14px;">Potential: ${bet.potentialWinnings} tickets</div>
+                <span class="ticket-status status-${bet.status}">${bet.status}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+
+    function showHelp() {
+      currentView = "help";
+      const container = document.getElementById("odds-content");
+      
+      container.innerHTML = `
+        <div style="max-width: 800px;">
+          <h2 style="color: #dc2626; margin-bottom: 20px;">❓ Help & Support</h2>
+          
+          <div style="background: linear-gradient(135deg, #2c2c2c 0%, #242424 100%); padding: 25px; border-radius: 12px; border: 1px solid #444; margin-bottom: 20px;">
+            <h3 style="color: white; margin-bottom: 15px;">Welcome to Karuta's Casino</h3>
+            <p style="color: #ccc; line-height: 1.6;">
+              We're here to provide you with complete support and professionalism in using our sports betting platform.
+            </p>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #2c2c2c 0%, #242424 100%); padding: 25px; border-radius: 12px; border: 1px solid #444; margin-bottom: 20px;">
+            <h3 style="color: #dc2626; margin-bottom: 15px;">🎯 How to Place Bets</h3>
+            <ul style="color: #ccc; line-height: 1.8; padding-left: 20px;">
+              <li>Select a sport from the sidebar (Football, NBA, UFC)</li>
+              <li>Browse available matches and their odds</li>
+              <li>Click "Bet" on your preferred outcome</li>
+              <li>Enter your bet amount in the modal</li>
+              <li>Review the potential winnings</li>
+              <li>Confirm your bet to place it</li>
+            </ul>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #2c2c2c 0%, #242424 100%); padding: 25px; border-radius: 12px; border: 1px solid #444; margin-bottom: 20px;">
+            <h3 style="color: #dc2626; margin-bottom: 15px;">🎟️ Ticket System</h3>
+            <ul style="color: #ccc; line-height: 1.8; padding-left: 20px;">
+              <li>Tickets are your betting currency</li>
+              <li>Each authorized user starts with a different amount</li>
+              <li>You can only bet tickets you currently have</li>
+              <li>Winning bets will add tickets to your balance</li>
+              <li>View your betting history in "Biletele Mele"</li>
+            </ul>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #2c2c2c 0%, #242424 100%); padding: 25px; border-radius: 12px; border: 1px solid #444;">
+            <h3 style="color: #dc2626; margin-bottom: 15px;">👥 User Access</h3>
+            <ul style="color: #ccc; line-height: 1.8; padding-left: 20px;">
+              <li><strong>Registration:</strong> Only authorized users can register</li>
+              <li><strong>Login:</strong> Use your registered credentials</li>
+              <li><strong>Authorized Users:</strong> EVVORTEX, Razgab, Luca, Roby56</li>
+              <li><strong>Support:</strong> Contact platform administrator for issues</li>
+            </ul>
+          </div>
+
+          <div style="text-align: <a onclick="loadSport()">Sport</a>
+; margin-top: 30px; padding: 20px; background: rgba(220, 38, 38, 0.1); border-radius: 8px; border: 1px solid rgba(220, 38, 38, 0.2);">
+            <p style="color: #dc2626; font-weight: bold;">Thank you for using Karuta's Casino!</p>
+            <p style="color: #ccc; font-size: 14px; margin-top: 5px;">Experience the thrill of sports betting with us.</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('betting-modal');
+      if (event.target === modal) {
+        closeBettingModal();
+      }
+    }
+
+    // Load default sport on page load for authenticated users
+    function loadWeeklyHighlights() {
+      loadOdds('basketball_nba');
+    }
+async function settleFinishedUFCBets() {
+  const apiKey = "2cc70cff24f844d7b1ac01236cc8e9bf";
+  const date = "2025-JUN-14"; // sau ziua curentă
+
+  const url = `https://api.sportsdata.io/v3/mma/scores/json/FightsByDate/${date}`;
+  const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
+
+  const response = await fetch(proxyUrl, {
+    headers: {
+      "Ocp-Apim-Subscription-Key": apiKey
+    }
+  });
+
+  const fights = await response.json();
+
+  for (const user in userBets) {
+    userBets[user].forEach(bet => {
+      if (bet.status !== "pending") return;
+
+      const match = fights.find(fight =>
+        fight.Fighter1?.Name === bet.outcomeName || fight.Fighter2?.Name === bet.outcomeName
+      );
+
+      if (!match || !match.WinnerId) return;
+
+      const winnerName =
+        match.Fighter1Id === match.WinnerId ? match.Fighter1.Name : match.Fighter2.Name;
+
+      if (bet.outcomeName === winnerName) {
+        bet.status = "won";
+        userTickets[user] += bet.potentialWinnings;
+      } else {
+        bet.status = "lost";
+      }
+    });
+  }
+
+  updateTicketDisplay();
+  if (currentView === "tickets") showMyTickets();
+  alert("✅ Biletele au fost actualizate automat pe baza rezultatelor reale.");
+}
+
+  </script>
+<script>
+  // ... other code ...
+
+  function showAdminPanel() {
+  if (currentUser !== "EVVORTEX") {
+    alert("Access denied.");
+    return;
+  }
+  container.innerHTML += `
+  <button onclick="showAllBetsFromFirebase()" style="margin-bottom: 15px; padding: 10px 16px; background: #1e1e1e; color: #fff; border: 1px solid #dc2626; border-radius: 8px; cursor: pointer;">
+    🔍 View All Firebase Bets
+  </button>
+`;
+
+  const container = document.getElementById("odds-content");
+  container.innerHTML = `<h2 style="color: #dc2626; margin-bottom: 20px;">🧠 Admin Panel - Ticket Editor & Betting History</h2>`;
+
+  for (const user of allowedUsers) {
+    const currentTickets = userTickets[user] ?? 0;
+    container.innerHTML += `
+      <div style="margin-bottom: 15px; background-color: #2c2c2c; padding: 15px; border-radius: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid #444;">
+        <div style="flex: 1; font-weight: bold; color: #fff;">👤 ${user}</div>
+        <div style="flex: 1; color: #ccc;">🎟️ <span id="tickets-${user}">${currentTickets}</span></div>
+        <input id="input-${user}" type="number" min="0" value="${currentTickets}" style="width: 80px; padding: 6px; background: #1e1e1e; color: white; border: 1px solid #444; border-radius: 6px;">
+        <button onclick="saveTicketUpdate('${user}')" style="padding: 6px 10px; background: #dc2626; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Save</button>
+      </div>
+    `;
+
+      const bets = (userBets[user] || []);
+if (bets.length > 0) {
+  container.innerHTML += `
+    <div style="margin-bottom: 30px; background: #232323; border-radius: 8px; border: 1px solid #444; padding: 10px 20px;">
+      <div style="color: #4ade80; font-weight: bold; margin-bottom: 8px;">Betting History for ${user}:</div>
+    ${bets.map((bet, betIdx) => {
+  let matchLabel = '';
+  if (bet.match && bet.match.fighters) {
+    matchLabel = `${bet.match.fighters[0].name} vs ${bet.match.fighters[1].name}`;
+  } else if (bet.match) {
+    matchLabel = `${bet.match.away_team} vs ${bet.match.home_team}`;
+  } else {
+    matchLabel = 'Unknown match';
+  }
+  let statusColor = "#fbbf24";
+  if (bet.status === "won") statusColor = "#4ade80";
+  if (bet.status === "lost") statusColor = "#ef4444";
+  let settleBtns = '';
+  if (bet.status === "pending") {
+    settleBtns = `
+      <button onclick="settleBet('${user}', ${betIdx}, true)" style="margin-right:8px; background:#4ade80; color:#222; border:none; border-radius:4px; padding:4px 10px; font-weight:bold; cursor:pointer;">Mark as Won</button>
+      <button onclick="settleBet('${user}', ${betIdx}, false)" style="background:#ef4444; color:#fff; border:none; border-radius:4px; padding:4px 10px; font-weight:bold; cursor:pointer;">Mark as Lost</button>
+    `;
+  }
+  return `
+    <div style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #333;">
+      <div><b>Match:</b> ${matchLabel}</div>
+      <div><b>Outcome:</b> ${bet.outcomeName}</div>
+      <div><b>Amount:</b> ${bet.amount} tickets</div>
+      <div><b>Odds:</b> ${bet.odds ? bet.odds.toFixed(2) : 'N/A'}</div>
+      <div><b>Potential Winnings:</b> ${bet.potentialWinnings} tickets</div>
+      <div><b>Placed At:</b> ${bet.placedAt ? new Date(bet.placedAt).toLocaleString() : 'N/A'}</div>
+      <div><b>Status:</b> <span style="color: ${statusColor}; font-weight: bold;">${bet.status}</span></div>
+      ${settleBtns}
+    </div>
+  `;
+}).reverse().join('')}
+    </div>
+  `;
+} else {
+        container.innerHTML += `
+          <div style="margin-bottom: 30px; background: #232323; border-radius: 8px; border: 1px solid #444; padding: 10px 20px;">
+            <div style="color: #ccc;">No bets for ${user}.</div>
+          </div>
+        `;
+      }
+    }
+  }
+
+  // ... rest of your code ...
+function settleFinishedUFCBets() {
+  let settledAny = false;
+  for (const user in userBets) {
+    userBets[user].forEach(bet => {
+      if (bet.status === "pending" && bet.match && bet.match.fighters) {
+        // You can add your real logic here for win/loss, for demo we mark as won:
+        bet.status = "won";
+        userTickets[user] += bet.potentialWinnings;
+        settledAny = true;
+      }
+    });
+  }
+  updateTicketDisplay();
+  if (currentView === "tickets") showMyTickets();
+  if (settledAny) {
+    alert("✅ Biletele au fost actualizate automat pe baza rezultatelor reale.");
+  } else {
+    alert("Nu există bilete UFC de actualizat.");
+  }
+}
+function settleBet(username, betIndex, isWon) {
+  const bet = userBets[username][betIndex];
+  if (bet.status !== "pending") return;
+  bet.status = isWon ? "won" : "lost";
+  if (isWon) userTickets[username] += bet.potentialWinnings;
+  updateTicketDisplay();
+  // Always re-render the admin panel after settling a bet
+  showAdminPanel();
+  alert(`Bet for ${username} marked as ${isWon ? "WON" : "LOST"}.`);
+}
+function openBettingModalFromSport(sport, index, outcome, outcomeName, price) {
+  let match;
+  if (sport === 'uefa') match = window.sportMatches.uefa[index];
+  else if (sport === 'nba') match = window.sportMatches.nba[index];
+  else if (sport === 'ufc') match = window.sportMatches.ufc[index];
+  selectedMatch = match;
+  selectedOdd = { outcome, name: outcomeName, price };
+  openBettingModalForSport();
+}
+
+function openBettingModalForSport() {
+  const modal = document.getElementById('betting-modal');
+  const selectedBetDisplay = document.getElementById('selected-bet-display');
+  const availableTickets = document.getElementById('available-tickets');
+  let matchLabel = '';
+  let matchTime = '';
+  if (selectedMatch.fighters) {
+    matchLabel = `${selectedMatch.fighters[0].name} vs ${selectedMatch.fighters[1].name}`;
+    matchTime = new Date(selectedMatch.date).toLocaleString('ro-RO', { timeZone: 'Europe/Bucharest' });
+  } else {
+    matchLabel = `${selectedMatch.away_team} vs ${selectedMatch.home_team}`;
+    matchTime = new Date(selectedMatch.commence_time).toLocaleString('ro-RO', { timeZone: 'Europe/Bucharest' });
+  }
+  selectedBetDisplay.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-weight: bold; font-size: 16px;">${selectedOdd.name}</div>
+        <div style="color: #ccc; font-size: 14px;">${matchLabel}</div>
+        <div style="color: #ccc; font-size: 12px;">${matchTime}</div>
+      </div>
+      <div>
+        <div class="odd" style="margin: 0;">${parseFloat(selectedOdd.price).toFixed(2)}</div>
+      </div>
+    </div>
+  `;
+  availableTickets.textContent = userTickets[currentUser];
+  document.getElementById('bet-amount').value = '';
+  document.getElementById('bet-calculation').classList.add('hidden');
+  document.getElementById('bet-error').classList.add('hidden');
+  document.getElementById('place-bet-btn').disabled = true;
+  modal.style.display = 'block';
+}
+
+function showAllBetsFromFirebase() {
+  if (currentUser !== "EVVORTEX") return alert("Access denied.");
+
+  const container = document.getElementById("odds-content");
+  container.innerHTML = `<h2 style="color: #dc2626; margin-bottom: 20px;">🗂️ All Firebase Bets (Admin)</h2>`;
+
+  loadAllBetsFromFirebase((allBets) => {
+    let any = false;
+
+    for (const user in allBets) {
+      const bets = allBets[user];
+      if (!bets.length) continue;
+      any = true;
+
+      container.innerHTML += `<h3 style="color: white; margin-top: 20px;">👤 ${user}</h3>`;
+
+      bets.reverse().forEach(bet => {
+        container.innerHTML += `
+          <div class="ticket-item">
+            <div class="ticket-header">
+              <div>
+                <div class="ticket-match">${bet.match}</div>
+                <div class="ticket-details">
+                  Bet on: ${bet.odd} | Cote: ${bet.cote.toFixed(2)}
+                </div>
+              </div>
+              <div class="ticket-amount">
+                <div><b>${bet.amount} 🎟️</b></div>
+                <div style="font-size: 12px; color: #ccc;">${new Date(bet.timestamp).toLocaleString()}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    if (!any) {
+      container.innerHTML += `<div class="empty-state"><h3>No bets placed in Firebase.</h3></div>`;
+    }
+  });
+}
+
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyANxeEV8QlGDWdi4RrVK8qd7VTuM5Un8VI",
+    authDomain: "kcasino-f35a8.firebaseapp.com",
+    databaseURL: "https://kcasino-f35a8-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "kcasino-f35a8",
+    storageBucket: "kcasino-f35a8.firebasestorage.app",
+    messagingSenderId: "215657852255",
+    appId: "1:215657852255:web:a100eb5abe8d9e9f899aea",
+    measurementId: "G-DNKF7D6YLM"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // 🔸 Salvează ticketele în Firebase
+  window.saveTicketsToFirebase = function (username, ticketCount) {
+    set(ref(db, "users/" + username), {
+      tickets: ticketCount
+    }).then(() => {
+      console.log("✅ Ticketele au fost salvate pentru", username);
+    });
+  };
+
+  // 🔸 Încarcă ticketele din Firebase
+  window.loadTicketsFromFirebase = async function (username, callback) {
+    const snapshot = await get(child(ref(db), "users/" + username));
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      callback(data.tickets);
+    } else {
+      callback(0); // sau valoare default
+    }
+  };
+  window.saveBetToFirebase = function (username, odd, amount, match) {
+  const dbRef = ref(db, "bets/" + username);
+  get(dbRef).then(snapshot => {
+    const existing = snapshot.exists() ? snapshot.val() : [];
+    const updated = [
+      ...existing,
+      {
+        match,
+        odd: odd.name,
+        cote: parseFloat(odd.price),
+        amount,
+        timestamp: Date.now()
+      }
+    ];
+    set(dbRef, updated).then(() => {
+      console.log("✅ Bilet salvat în Firebase");
+    });
+  });
+};
+window.loadBetsFromFirebase = function (username, callback) {
+  get(child(ref(db), "bets/" + username)).then(snapshot => {
+    if (snapshot.exists()) {
+      callback(snapshot.val());
+    } else {
+      callback([]);
+    }
+  });
+};
+function saveBetToFirebase(username, betData) {
+  const dbRef = ref(db, `bets/${username}/${Date.now()}`);
+  set(dbRef, betData).then(() => {
+    console.log("✅ Bet saved for", username);
+  });
+}
+
+window.loadAllBetsFromFirebase = function(callback) {
+  const users = ["EVVORTEX", "Razgab", "Luca", "Roby56"];
+  const dbRef = ref(db);
+  const allBets = {};
+  let remaining = users.length;
+
+  users.forEach(user => {
+    get(child(dbRef, "bets/" + user)).then(snapshot => {
+      allBets[user] = snapshot.exists() ? snapshot.val() : [];
+      remaining--;
+      if (remaining === 0) {
+        callback(allBets);
+      }
+    });
+  });
+};
+
+
+  <script>
+</body>
+</html>
