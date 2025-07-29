@@ -666,11 +666,28 @@ const manualOdds = {
 };
 
 
-    let selectedMatch = null;
-    let selectedOdd = null;
+      let selectedMatch = null;
+  let selectedOdd = null;
+
+  function saveData() {
+    localStorage.setItem("karuta_users", JSON.stringify(users));
+    localStorage.setItem("karuta_userTickets", JSON.stringify(userTickets));
+    localStorage.setItem("karuta_userBets", JSON.stringify(userBets));
+  }
+
+  function loadData() {
+    const storedUsers = JSON.parse(localStorage.getItem("karuta_users"));
+    const storedTickets = JSON.parse(localStorage.getItem("karuta_userTickets"));
+    const storedBets = JSON.parse(localStorage.getItem("karuta_userBets"));
+
+    if (storedUsers) Object.assign(users, storedUsers);
+    if (storedTickets) Object.assign(userTickets, storedTickets);
+    if (storedBets) Object.assign(userBets, storedBets);
+  }
 
     // Initialize app
     document.addEventListener('DOMContentLoaded', function() {
+      loadData();
       updateTicketDisplay();
       if (currentUser === "EVVORTEX") {
   document.getElementById("admin-view-btn").classList.remove("hidden");
@@ -678,23 +695,32 @@ const manualOdds = {
 }
 
 
-function saveTicketUpdate(username) {
+window.saveTicketUpdate = function(username) {
   const input = document.getElementById(`input-${username}`);
   const newValue = parseInt(input.value);
 
   if (isNaN(newValue) || newValue < 0) {
     alert("⚠️ Invalid number");
+    input.value = userTickets[username] || 0;
     return;
   }
 
+  // Update the ticket count
   userTickets[username] = newValue;
+  
+  // Update the display in the admin panel
   document.getElementById(`tickets-${username}`).textContent = newValue;
 
-  alert(`✅ Updated ${username} to ${newValue} tickets`);
-
+  // Update the main ticket display if it's the current user
   if (username === currentUser) {
-    updateTicketDisplay(); // dacă admin își editează propriile tickete
+    updateTicketDisplay();
   }
+
+  // Save to localStorage
+  saveData();
+  
+  // Show success message
+  alert(`✅ Successfully saved ${username}'s tickets to ${newValue}`);
 }
 
 
@@ -761,6 +787,8 @@ function saveTicketUpdate(username) {
   // ✅ Salvează automat username și parola
   localStorage.setItem("karuta_user", username);
   localStorage.setItem("karuta_pass", password);
+
+  saveData();
 
   message.textContent = "Registered successfully. Now login.";
   message.style.color = "#4ade80";
@@ -1074,6 +1102,9 @@ function loadOdds(sport) {
       
       // Deduct tickets
       userTickets[currentUser] -= betAmount;
+      
+      // Save data
+      saveData();
       
       // Update display
       updateTicketDisplay();
@@ -1423,7 +1454,7 @@ async function settleFinishedUFCBets() {
 <script>
   // ... other code ...
 
-  function showAdminPanel() {
+  window.showAdminPanel = function() {
   if (currentUser !== "EVVORTEX") {
     alert("Access denied.");
     return;
@@ -1512,11 +1543,12 @@ function settleFinishedUFCBets() {
     alert("Nu există bilete UFC de actualizat.");
   }
 }
-function settleBet(username, betIndex, isWon) {
+window.settleBet = function(username, betIndex, isWon) {
   const bet = userBets[username][betIndex];
   if (bet.status !== "pending") return;
   bet.status = isWon ? "won" : "lost";
   if (isWon) userTickets[username] += bet.potentialWinnings;
+  saveData();
   updateTicketDisplay();
   // Always re-render the admin panel after settling a bet
   showAdminPanel();
