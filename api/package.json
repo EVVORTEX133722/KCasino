@@ -1,0 +1,16 @@
+{
+  "name": "karuta-casino",
+  "version": "1.0.0",
+  "description": "Sports betting website with Neon database",
+  "main": "index.js",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/neon": "^0.9.0",
+    "bcrypt": "^5.1.1"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^2.0.0"
+  }
+}
