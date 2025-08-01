@@ -10,7 +10,10 @@ export const handler = async (event) => {
     const { username, password } = JSON.parse(event.body);
     
     // Check if user already exists
-    const [existingUser] = await sql`SELECT id FROM users WHERE username = ${username}`;
+    const [existingUser] = await sql`
+      SELECT id FROM users WHERE username = ${username}
+    `;
+    
     if (existingUser) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Username already exists' }) };
     }
@@ -18,8 +21,8 @@ export const handler = async (event) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // Create new user
-    const [user] = await sql`
+    // Create user with initial tickets
+    const [newUser] = await sql`
       INSERT INTO users (username, password_hash, tickets) 
       VALUES (${username}, ${hashedPassword}, 50)
       RETURNING id, username, tickets
@@ -27,13 +30,12 @@ export const handler = async (event) => {
     
     return {
       statusCode: 200,
-      body: JSON.stringify({ 
-        success: true, 
-        message: 'User registered successfully',
+      body: JSON.stringify({
+        success: true,
         user: {
-          id: user.id,
-          username: user.username,
-          tickets: user.tickets
+          id: newUser.id,
+          username: newUser.username,
+          tickets: newUser.tickets
         }
       })
     };
@@ -41,4 +43,4 @@ export const handler = async (event) => {
     console.error('Registration error:', error);
     return { statusCode: 500, body: JSON.stringify({ error: 'Registration failed' }) };
   }
-};
+}; 
