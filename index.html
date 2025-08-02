@@ -669,25 +669,10 @@ const manualOdds = {
       let selectedMatch = null;
   let selectedOdd = null;
 
-  function saveData() {
-    localStorage.setItem("karuta_users", JSON.stringify(users));
-    localStorage.setItem("karuta_userTickets", JSON.stringify(userTickets));
-    localStorage.setItem("karuta_userBets", JSON.stringify(userBets));
-  }
 
-  function loadData() {
-    const storedUsers = JSON.parse(localStorage.getItem("karuta_users"));
-    const storedTickets = JSON.parse(localStorage.getItem("karuta_userTickets"));
-    const storedBets = JSON.parse(localStorage.getItem("karuta_userBets"));
-
-    if (storedUsers) Object.assign(users, storedUsers);
-    if (storedTickets) Object.assign(userTickets, storedTickets);
-    if (storedBets) Object.assign(userBets, storedBets);
-  }
 
     // Initialize app
     document.addEventListener('DOMContentLoaded', function() {
-      loadData();
       updateTicketDisplay();
       if (currentUser === "EVVORTEX") {
   document.getElementById("admin-view-btn").classList.remove("hidden");
@@ -716,8 +701,7 @@ window.saveTicketUpdate = function(username) {
     updateTicketDisplay();
   }
 
-  // Save to localStorage
-  saveData();
+ 
   
   // Show success message
   alert(`✅ Successfully saved ${username}'s tickets to ${newValue}`);
@@ -750,17 +734,12 @@ window.saveTicketUpdate = function(username) {
       }
     }
 
-    function register() {
+async function register() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
   const message = document.getElementById("auth-message");
 
   message.textContent = "";
-
-    if (currentUser === "EVVORTEX") {
-      document.getElementById("admin-panel-btn").classList.remove("hidden");
-    }
-  message.style.color = "#ef4444";
 
   if (!username || !password) {
     message.textContent = "Please enter username and password.";
@@ -772,39 +751,33 @@ window.saveTicketUpdate = function(username) {
     return;
   }
 
-  if (users[username]) {
-    message.textContent = "Username already registered.";
-    return;
+  try {
+    const response = await fetch('/.netlify/functions/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      message.textContent = "Registered successfully. Now login.";
+      message.style.color = "#4ade80";
+    } else {
+      message.textContent = data.error;
+      message.style.color = "#ef4444";
+    }
+  } catch (error) {
+    message.textContent = "Registration failed.";
+    message.style.color = "#ef4444";
   }
-
-  users[username] = password;
-  userBets[username] = [];
-
-  if (userTickets[username] === undefined) {
-    userTickets[username] = 50;
-  }
-
-  // ✅ Salvează automat username și parola
-  localStorage.setItem("karuta_user", username);
-  localStorage.setItem("karuta_pass", password);
-
-  saveData();
-
-  message.textContent = "Registered successfully. Now login.";
-  message.style.color = "#4ade80";
 }
 
 
-    function login() {
-  let username = document.getElementById("username").value.trim();
-  let password = document.getElementById("password").value.trim();
+async function login() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
   const message = document.getElementById("auth-message");
-
-  // ✅ Dacă userul nu a scris manual, încercăm din localStorage
-  if (!username || !password) {
-    username = localStorage.getItem("karuta_user") || "";
-    password = localStorage.getItem("karuta_pass") || "";
-  }
 
   message.style.color = "#ef4444";
 
@@ -813,19 +786,32 @@ window.saveTicketUpdate = function(username) {
     return;
   }
 
-  if (users[username] === password) {
-    currentUser = username;
-    document.getElementById("auth-section").classList.add("hidden");
-    document.getElementById("main-content").classList.remove("hidden");
-    updateTicketDisplay();
-    loadOdds(currentSport);
-    message.textContent = "";
+  try {
+    const response = await fetch('/.netlify/functions/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      currentUser = data.user.username;
+      userTickets[currentUser] = data.user.tickets;
+      document.getElementById("auth-section").classList.add("hidden");
+      document.getElementById("main-content").classList.remove("hidden");
+      updateTicketDisplay();
+      loadOdds(currentSport);
+      message.textContent = "";
 
-    if (currentUser === "EVVORTEX") {
-      document.getElementById("admin-panel-btn").classList.remove("hidden");
+      if (currentUser === "EVVORTEX") {
+        document.getElementById("admin-panel-btn").classList.remove("hidden");
+      }
+    } else {
+      message.textContent = data.error;
     }
-  } else {
-    message.textContent = "Invalid credentials.";
+  } catch (error) {
+    message.textContent = "Login failed.";
   }
 }
 
@@ -1069,112 +1055,48 @@ function loadOdds(sport) {
       placeBetBtn.disabled = false;
     }
 
-    function placeBet() {
-      if (!selectedMatch || !selectedOdd || !currentUser) return;
-      
-      const betAmount = parseInt(document.getElementById('bet-amount').value) || 0;
-      
-      if (betAmount <= 0 || betAmount > userTickets[currentUser]) return;
-      
-      const odds = parseFloat(selectedOdd.price);
-      const potentialWinnings = Math.floor(betAmount * odds);
-      
-      // Create bet record
-      const bet = {
-        id: Date.now(),
-        match: selectedMatch,
+async function placeBet() {
+  if (!selectedMatch || !selectedOdd || !currentUser) return;
+  
+  const betAmount = parseInt(document.getElementById('bet-amount').value) || 0;
+  
+  if (betAmount <= 0 || betAmount > userTickets[currentUser]) return;
+  
+  const odds = parseFloat(selectedOdd.price);
+  const potentialWinnings = Math.floor(betAmount * odds);
+  
+  try {
+    const response = await fetch('/.netlify/functions/place-bet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: currentUser,
+        matchData: selectedMatch,
         outcome: selectedOdd.outcome,
         outcomeName: selectedOdd.name,
         amount: betAmount,
         odds: odds,
-        potentialWinnings: potentialWinnings,
-        placedAt: new Date(),
-        status: 'pending'
-      };
-      
-      // Initialize user bets if not exists
-      if (!userBets[currentUser]) {
-        userBets[currentUser] = [];
-      }
-      
-      // Add bet to user's bets
-      userBets[currentUser].push(bet);
-      
-      // Deduct tickets
+        potentialWinnings: potentialWinnings
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      // Update local state
       userTickets[currentUser] -= betAmount;
-      
-      // Save data
-      saveData();
-      
-      // Update display
       updateTicketDisplay();
       
-      // Show success message
       alert(`Bet placed successfully! You bet ${betAmount} tickets on ${selectedOdd.name}. Potential winnings: ${potentialWinnings} tickets.`);
-      function showAllTickets() {
-  if (currentUser !== "EVVORTEX") return alert("Access denied.");
-
-  const container = document.getElementById("odds-content");
-  container.innerHTML = `<h2 style="color: #dc2626; margin-bottom: 20px;">🎫 All User Tickets</h2>`;
-
-  let foundAny = false;
-
-  for (const user in userBets) {
-    const bets = userBets[user];
-    if (!bets || !bets.length) continue;
-
-    foundAny = true;
-    container.innerHTML += `<h3 style="margin-top: 20px; color: #fff;">👤 ${user}</h3>`;
-
-    bets.slice().reverse().forEach(bet => {
-      container.innerHTML += `
-        <div class="ticket-item">
-          <div class="ticket-header">
-            <div>
-              <div class="ticket-match">${bet.match.away_team} vs ${bet.match.home_team}</div>
-              <div class="ticket-details">
-                Bet on: ${bet.outcomeName} | Placed: ${new Date(bet.placedAt).toLocaleString()}
-              </div>
-            </div>
-            <div class="ticket-amount">
-              <div style="font-weight: bold;">${bet.amount} tickets @ ${bet.odds.toFixed(2)}</div>
-              <div style="color: #4ade80; font-size: 14px;">Potential: ${bet.potentialWinnings} tickets</div>
-              <span class="ticket-status status-${bet.status}">${bet.status}</span>
-            </div>
-          </div>
-        </div>
-      `;
-    });
-  }
-function adjustTickets() {
-  if (currentUser !== "EVVORTEX") return alert("Access denied.");
-
-  const username = prompt("Enter username to modify:");
-  if (!allowedUsers.includes(username)) return alert("User not allowed or doesn't exist.");
-
-  const current = userTickets[username] ?? 0;
-  const newAmount = prompt(`Current tickets: ${current}\nEnter new ticket amount:`);
-
-  const parsed = parseInt(newAmount);
-  if (isNaN(parsed) || parsed < 0) return alert("Invalid number.");
-
-  userTickets[username] = parsed;
-  alert(`✅ Updated ${username}'s tickets to ${parsed}.`);
-
-  if (username === currentUser) {
-    updateTicketDisplay(); // dacă își modifică propriile tickete
-  }
-}
-
-  if (!foundAny) {
-    container.innerHTML += `
-      <div class="empty-state"><h3>No bets placed by any users yet.</h3></div>
-    `;
-  }
-}
-
       closeBettingModal();
+    } else {
+      alert(`Error: ${data.error}`);
     }
+  } catch (error) {
+    alert("Failed to place bet.");
+  }
+}
+
 
     function loadSport() {
   currentView = "sport";
@@ -1548,7 +1470,6 @@ window.settleBet = function(username, betIndex, isWon) {
   if (bet.status !== "pending") return;
   bet.status = isWon ? "won" : "lost";
   if (isWon) userTickets[username] += bet.potentialWinnings;
-  saveData();
   updateTicketDisplay();
   // Always re-render the admin panel after settling a bet
   showAdminPanel();
