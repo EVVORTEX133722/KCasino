@@ -812,18 +812,24 @@ window.saveTicketUpdate = async function(username) {
   }
 
   try {
-    await apiCall('/register', {
+    const response = await fetch('/.netlify/functions/register', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
     });
-
-    message.textContent = "Registered successfully. Now login.";
-    message.style.color = "#4ade80";
     
-    // Auto-login after registration
-    setTimeout(() => login(), 1000);
+    const data = await response.json();
+    
+    if (response.ok) {
+      message.textContent = "Registered successfully. Now login.";
+      message.style.color = "#4ade80";
+      // Auto-login after registration
+      setTimeout(() => login(), 1000);
+    } else {
+      message.textContent = data.error;
+    }
   } catch (error) {
-    message.textContent = error.message;
+    message.textContent = "Registration failed. Please try again.";
   }
 }
 
@@ -847,33 +853,40 @@ window.saveTicketUpdate = async function(username) {
   }
 
   try {
-    const response = await apiCall('/login', {
+    const response = await fetch('/.netlify/functions/login', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
     });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      // Store auth data
+      authToken = data.token;
+      currentUser = data.user.username;
+      currentUserTickets = data.user.tickets;
 
-    // Store auth data
-    authToken = response.token;
-    currentUser = response.user.username;
-    currentUserTickets = response.user.tickets;
+      // Store in localStorage for persistence
+      localStorage.setItem('karuta_auth_token', authToken);
+      localStorage.setItem('karuta_username', currentUser);
+      localStorage.setItem('karuta_password', password);
 
-    // Store in localStorage for persistence
-    localStorage.setItem('karuta_auth_token', authToken);
-    localStorage.setItem('karuta_username', currentUser);
-    localStorage.setItem('karuta_password', password);
+      // Update UI
+      document.getElementById("auth-section").classList.add("hidden");
+      document.getElementById("main-content").classList.remove("hidden");
+      updateTicketDisplay();
+      loadOdds(currentSport);
+      message.textContent = "";
 
-    // Update UI
-    document.getElementById("auth-section").classList.add("hidden");
-    document.getElementById("main-content").classList.remove("hidden");
-    updateTicketDisplay();
-    loadOdds(currentSport);
-    message.textContent = "";
-
-    if (currentUser === "EVVORTEX") {
-      document.getElementById("admin-panel-btn").classList.remove("hidden");
+      if (currentUser === "EVVORTEX") {
+        document.getElementById("admin-panel-btn").classList.remove("hidden");
+      }
+    } else {
+      message.textContent = data.error;
     }
   } catch (error) {
-    message.textContent = error.message;
+    message.textContent = "Login failed. Please try again.";
   }
 }
 
@@ -1139,10 +1152,13 @@ function loadOdds(sport) {
       const potentialWinnings = Math.floor(betAmount * odds);
       
       try {
-        const response = await apiCall('/bets', {
+        const response = await fetch('/.netlify/functions/place-bet', {
           method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
           body: JSON.stringify({
-            matchId: selectedMatch.id || `${selectedMatch.away_team}_vs_${selectedMatch.home_team}`,
             matchData: selectedMatch,
             outcome: selectedOdd.outcome,
             outcomeName: selectedOdd.name,
@@ -1152,14 +1168,20 @@ function loadOdds(sport) {
           })
         });
         
-        // Update local ticket count
-        currentUserTickets = response.remainingTickets;
-        updateTicketDisplay();
+        const data = await response.json();
         
-        // Show success message
-        alert(`Bet placed successfully! You bet ${betAmount} tickets on ${selectedOdd.name}. Potential winnings: ${potentialWinnings} tickets.`);
-        
-        closeBettingModal();
+        if (response.ok) {
+          // Update local ticket count
+          currentUserTickets = data.remainingTickets;
+          updateTicketDisplay();
+          
+          // Show success message
+          alert(`Bet placed successfully! You bet ${betAmount} tickets on ${selectedOdd.name}. Potential winnings: ${potentialWinnings} tickets.`);
+          
+          closeBettingModal();
+        } else {
+          alert(`Error placing bet: ${data.error}`);
+        }
       } catch (error) {
         alert(`Error placing bet: ${error.message}`);
       }
