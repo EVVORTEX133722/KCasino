@@ -1,7 +1,7 @@
-import { neon } from '@netlify/neon';
+import { neon } from '@neondatabase/serverless';
 
-// Hardcoded connection for Netlify deployment
-const sql = neon('postgresql://neondb_owner:npg_MVBlgFeNks04@ep-nameless-cloud-aelm5n99-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require');
+// Uses NETLIFY_DATABASE_URL environment variable automatically
+const sql = neon(process.env.NETLIFY_DATABASE_URL);
 
 // Initialize database tables if they don't exist
 export async function initializeDatabase() {
