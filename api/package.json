@@ -9,7 +9,7 @@
     "deploy": "netlify deploy --prod"
   },
   "dependencies": {
-    "@netlify/neon": "^1.0.0"
+    "@netlify/neon": "^0.9.0"
   },
   "devDependencies": {
     "netlify-cli": "^17.0.0"
