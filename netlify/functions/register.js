@@ -1,8 +1,17 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 
+// Sanitize Neon connection string: remove channel_binding which pg does not support
+const rawConn = process.env.DATABASE_URL || '';
+let sanitizedConn = rawConn;
+try {
+  const u = new URL(rawConn);
+  u.searchParams.delete('channel_binding');
+  sanitizedConn = u.toString();
+} catch {}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: sanitizedConn,
   ssl: { rejectUnauthorized: false }
 });
 
