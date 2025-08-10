@@ -6,6 +6,26 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
+// Ensure required tables exist (idempotent)
+async function ensureSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(50) UNIQUE NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS user_tickets (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      ticket_count INTEGER DEFAULT 50,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+}
+
 const allowedUsers = ["EVVORTEX", "Razgab", "Luca", "Roby56"];
 
 exports.handler = async (event, context) => {
@@ -29,6 +49,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    await ensureSchema();
     const { username, password } = JSON.parse(event.body);
 
     if (!username || !password) {
@@ -60,31 +81,40 @@ exports.handler = async (event, context) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
-    const newUser = await pool.query(
-      'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username',
-      [username, hashedPassword]
-    );
+    // Create user if not exists and ensure ticket row exists atomically
+    let userRow;
+    await pool.query('BEGIN');
+    try {
+      const newUser = await pool.query(
+        'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username',
+        [username, hashedPassword]
+      );
+      userRow = newUser.rows[0];
 
-    // Set default ticket count
-    const defaultTickets = {
-      EVVORTEX: 278,
-      Razgab: 226,
-      Luca: 255,
-      Roby56: 176
-    };
+      const defaultTickets = {
+        EVVORTEX: 278,
+        Razgab: 226,
+        Luca: 255,
+        Roby56: 176
+      };
 
-    await pool.query(
-      'INSERT INTO user_tickets (user_id, ticket_count) VALUES ($1, $2)',
-      [newUser.rows[0].id, defaultTickets[username] || 50]
-    );
+      await pool.query(
+        'INSERT INTO user_tickets (user_id, ticket_count) VALUES ($1, $2)',
+        [userRow.id, defaultTickets[username] || 50]
+      );
+
+      await pool.query('COMMIT');
+    } catch (e) {
+      await pool.query('ROLLBACK');
+      throw e;
+    }
 
     return {
       statusCode: 201,
       headers,
       body: JSON.stringify({
         message: 'User registered successfully',
-        user: newUser.rows[0]
+        user: userRow
       })
     };
 
