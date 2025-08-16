@@ -18,3 +18,11 @@
   "author": "Karuta",
   "license": "MIT"
 }
+{
+  "name": "kcasino",
+  "version": "1.0.0",
+  "dependencies": {
+    "pg": "^8.11.3",
+    "bcryptjs": "^2.4.3"
+  }
+}
