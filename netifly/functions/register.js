@@ -1,7 +1,9 @@
-const { Client } = require('pg');
-const bcrypt = require('bcryptjs');
+import { neon } from '@neondatabase/serverless';
+import bcrypt from 'bcryptjs';
 
-exports.handler = async (event, context) => {
+const sql = neon(process.env.NETLIFY_DATABASE_URL);
+
+export const handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -26,35 +28,31 @@ exports.handler = async (event, context) => {
     };
   }
 
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
-  });
-
   try {
-    await client.connect();
-
-    // Check if user already exists
-    const existingUser = await client.query(
-      'SELECT username FROM users WHERE username = $1',
-      [username]
-    );
-
-    if (existingUser.rows.length > 0) {
+    // Check if user exists
+    const existingUser = await sql`SELECT username FROM users WHERE username = ${username}`;
+    
+    if (existingUser.length > 0) {
       return {
         statusCode: 400,
         body: JSON.stringify({ error: 'User already exists' })
       };
     }
 
-    // Hash password and insert user
+    // Hash password and create user
     const hashedPassword = await bcrypt.hash(password, 10);
     const defaultTickets = { EVVORTEX: 278, Razgab: 226, Luca: 255, Roby56: 176 };
     
-    await client.query(
-      'INSERT INTO users (username, password, tickets) VALUES ($1, $2, $3)',
-      [username, hashedPassword, defaultTickets[username] || 100]
-    );
+    const [newUser] = await sql`
+      INSERT INTO users (username, password_hash) 
+      VALUES (${username}, ${hashedPassword})
+      RETURNING *
+    `;
+    
+    await sql`
+      INSERT INTO user_tickets (user_id, ticket_count) 
+      VALUES (${newUser.id}, ${defaultTickets[username] || 100})
+    `;
 
     return {
       statusCode: 200,
@@ -67,7 +65,5 @@ exports.handler = async (event, context) => {
       statusCode: 500,
       body: JSON.stringify({ error: 'Registration failed' })
     };
-  } finally {
-    await client.end();
   }
 };
