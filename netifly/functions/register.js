@@ -1,9 +1,9 @@
-import { neon } from '@neondatabase/serverless';
-import bcrypt from 'bcryptjs';
+const { neon } = require('@neondatabase/serverless');
+const bcrypt = require('bcryptjs');
 
 const sql = neon(process.env.NETLIFY_DATABASE_URL);
 
-export const handler = async (event, context) => {
+exports.handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -11,24 +11,24 @@ export const handler = async (event, context) => {
     };
   }
 
-  const { username, password } = JSON.parse(event.body);
-  const allowedUsers = ["EVVORTEX", "Razgab", "Luca", "Roby56"];
-
-  if (!username || !password) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Username and password required' })
-    };
-  }
-
-  if (!allowedUsers.includes(username)) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Username not allowed' })
-    };
-  }
-
   try {
+    const { username, password } = JSON.parse(event.body);
+    const allowedUsers = ["EVVORTEX", "Razgab", "Luca", "Roby56"];
+
+    if (!username || !password) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Username and password required' })
+      };
+    }
+
+    if (!allowedUsers.includes(username)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Username not allowed' })
+      };
+    }
+
     // Check if user exists
     const existingUser = await sql`SELECT username FROM users WHERE username = ${username}`;
     
@@ -39,7 +39,7 @@ export const handler = async (event, context) => {
       };
     }
 
-    // Hash password and create user
+    // Create user
     const hashedPassword = await bcrypt.hash(password, 10);
     const defaultTickets = { EVVORTEX: 278, Razgab: 226, Luca: 255, Roby56: 176 };
     
@@ -63,7 +63,7 @@ export const handler = async (event, context) => {
     console.error('Registration error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Registration failed' })
+      body: JSON.stringify({ error: 'Registration failed: ' + error.message })
     };
   }
 };
