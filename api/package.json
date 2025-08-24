@@ -1,36 +1,8 @@
 {
   "name": "karuta-casino",
   "version": "1.0.0",
-  "description": "Sports betting application with Neon database",
-  "main": "index.html",
-  "scripts": {
-    "dev": "netlify dev",
-    "build": "echo 'No build step required'",
-    "deploy": "netlify deploy --prod"
-  },
-  "dependencies": {
-    "@neondatabase/serverless": "^0.9.0"
-  },
-  "devDependencies": {
-    "netlify-cli": "^17.0.0"
-  },
-  "keywords": ["betting", "sports", "casino", "netlify", "neon"],
-  "author": "Karuta",
-  "license": "MIT"
-}
-{
-  "name": "kcasino",
-  "version": "1.0.0",
-  "dependencies": {
-    "pg": "^8.11.3",
-    "bcryptjs": "^2.4.3"
-  }
-}
-{
-  "type": "module",
   "dependencies": {
     "@neondatabase/serverless": "^0.9.0",
     "bcryptjs": "^2.4.3"
   }
 }
-
