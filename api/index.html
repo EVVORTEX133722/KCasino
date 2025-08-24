@@ -641,15 +641,9 @@
   </div>
 
   <script>
-    const apiKey = "36f42e37ec955232d149850261c6eca1";
-    const allowedUsers = ["EVVORTEX", "Razgab", "Luca", "Roby56"];
-    const users = {};
-    const userTickets = {
-      EVVORTEX: 278,
-      Razgab: 226,
-      Luca: 255,
-      Roby56: 176
-    };
+   const allowedUser = "EVVORTEX";
+const correctPassword = "salamalekum";
+const userTickets = { EVVORTEX: 278 };
     const userBets = {};
     let currentUser = null;
     let currentSport = "basketball_nba";
@@ -734,47 +728,37 @@ window.saveTicketUpdate = function(username) {
       }
     }
 
-async function register() {
+function register() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
   const message = document.getElementById("auth-message");
 
   message.textContent = "";
+  message.style.color = "#ef4444";
 
   if (!username || !password) {
     message.textContent = "Please enter username and password.";
     return;
   }
 
-  if (!allowedUsers.includes(username)) {
-    message.textContent = "Username not allowed.";
+  if (username !== allowedUser) {
+    message.textContent = "Username not allowed. Only EVVORTEX can register.";
     return;
   }
 
-  try {
-    const response = await fetch('/.netlify/functions/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-    
-    const data = await response.json();
-    
-    if (response.ok) {
-      message.textContent = "Registered successfully. Now login.";
-      message.style.color = "#4ade80";
-    } else {
-      message.textContent = data.error;
-      message.style.color = "#ef4444";
-    }
-  } catch (error) {
-    message.textContent = "Registration failed.";
-    message.style.color = "#ef4444";
+  if (password !== correctPassword) {
+    message.textContent = "Incorrect password.";
+    return;
   }
+
+  message.textContent = "Registration successful! You can now login.";
+  message.style.color = "#4ade80";
+  document.getElementById("username").value = "";
+  document.getElementById("password").value = "";
 }
 
 
-async function login() {
+function login() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
   const message = document.getElementById("auth-message");
@@ -786,33 +770,22 @@ async function login() {
     return;
   }
 
-  try {
-    const response = await fetch('/.netlify/functions/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-    
-    const data = await response.json();
-    
-    if (response.ok) {
-      currentUser = data.user.username;
-      userTickets[currentUser] = data.user.tickets;
-      document.getElementById("auth-section").classList.add("hidden");
-      document.getElementById("main-content").classList.remove("hidden");
-      updateTicketDisplay();
-      loadOdds(currentSport);
-      message.textContent = "";
-
-      if (currentUser === "EVVORTEX") {
-        document.getElementById("admin-panel-btn").classList.remove("hidden");
-      }
-    } else {
-      message.textContent = data.error;
-    }
-  } catch (error) {
-    message.textContent = "Login failed.";
+  if (username !== allowedUser) {
+    message.textContent = "Username not allowed. Only EVVORTEX can login.";
+    return;
   }
+
+  if (password !== correctPassword) {
+    message.textContent = "Incorrect password.";
+    return;
+  }
+
+  currentUser = username;
+  document.getElementById("auth-section").classList.add("hidden");
+  document.getElementById("main-content").classList.remove("hidden");
+  updateTicketDisplay();
+  loadOdds(currentSport);
+  message.textContent = "";
 }
 
 
