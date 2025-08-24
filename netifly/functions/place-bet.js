@@ -1,4 +1,6 @@
-const { Client } = require('pg');
+const { neon } = require('@neondatabase/serverless');
+
+const sql = neon(process.env.NETLIFY_DATABASE_URL);
 
 exports.handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
@@ -8,30 +10,22 @@ exports.handler = async (event, context) => {
     };
   }
 
-  const { userId, matchData, outcome, outcomeName, amount, odds, potentialWinnings } = JSON.parse(event.body);
-
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
-  });
-
   try {
-    await client.connect();
+    const { userId, matchData, outcome, outcomeName, amount, odds, potentialWinnings } = JSON.parse(event.body);
 
-    // Check user's current tickets
-    const userResult = await client.query(
-      'SELECT tickets FROM users WHERE username = $1',
-      [userId]
-    );
-
-    if (userResult.rows.length === 0) {
+    // Get user by username
+    const [user] = await sql`SELECT * FROM users WHERE username = ${userId}`;
+    
+    if (!user) {
       return {
         statusCode: 404,
         body: JSON.stringify({ error: 'User not found' })
       };
     }
 
-    const currentTickets = userResult.rows[0].tickets;
+    // Get user's current tickets
+    const [userTickets] = await sql`SELECT ticket_count FROM user_tickets WHERE user_id = ${user.id}`;
+    const currentTickets = userTickets?.ticket_count || 0;
 
     if (currentTickets < amount) {
       return {
@@ -40,23 +34,18 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Start transaction
-    await client.query('BEGIN');
-
-    // Deduct tickets from user
-    await client.query(
-      'UPDATE users SET tickets = tickets - $1 WHERE username = $2',
-      [amount, userId]
-    );
+    // Deduct tickets
+    await sql`
+      UPDATE user_tickets 
+      SET ticket_count = ticket_count - ${amount}, updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = ${user.id}
+    `;
 
     // Insert bet record
-    await client.query(
-      `INSERT INTO bets (username, match_data, outcome, outcome_name, amount, odds, potential_winnings, status, created_at) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
-      [userId, JSON.stringify(matchData), outcome, outcomeName, amount, odds, potentialWinnings, 'pending']
-    );
-
-    await client.query('COMMIT');
+    await sql`
+      INSERT INTO bets (user_id, match_data, outcome, outcome_name, amount, odds, potential_winnings, status)
+      VALUES (${user.id}, ${JSON.stringify(matchData)}, ${outcome}, ${outcomeName}, ${amount}, ${odds}, ${potentialWinnings}, 'pending')
+    `;
 
     return {
       statusCode: 200,
@@ -64,13 +53,10 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    await client.query('ROLLBACK');
     console.error('Place bet error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to place bet' })
+      body: JSON.stringify({ error: 'Failed to place bet: ' + error.message })
     };
-  } finally {
-    await client.end();
   }
 };
